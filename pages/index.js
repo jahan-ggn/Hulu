@@ -20,14 +20,15 @@ export default function Home({ results }) {
       `https://api.themoviedb.org/3${requests[router.query.genre]?.url || requests.fetchTrendingMovies.url
       }&page=${pageNo}`
     )
-    console.log("URL ===> ", request.url)
+
     const newMovies = await request.json();
-    console.log("RESPONSE ===> ", newMovies.results)
-    setMovies([...movies, ...newMovies.results]);
-    if(pageNo === 1000){
+    if(!newMovies.results){
       setHasMore(false)
     }
-    setpageNo(pageNo + 1)
+    else{
+      setMovies([...movies, ...newMovies.results]);
+      setpageNo(pageNo + 1)
+    }
   }
 
   return (
@@ -44,7 +45,7 @@ export default function Home({ results }) {
       dataLength={movies.length}
       next={getMoreMovies}
       hasMore={hasMore}
-      loader={<h4> Loading...</h4>}
+      loader={<h4> Loading... </h4>}
       endMessage={
         <p style={{ textAlign: "center" }}>
           <b>Yay! You have seen it all</b>
@@ -52,7 +53,7 @@ export default function Home({ results }) {
       }>
         <div className="px-5 my-10 sm:grid md:grid-cols-2 xl:grid-cols-3 3xl:flex flex-wrap justify-center">
               {movies.map((movie) => (
-                  <Thumbnail key={movie.id} result={movie}/>
+                <Thumbnail key={movie.id} result={movie}/>
               ))}
         </div>
       </InfiniteScroll>
@@ -67,9 +68,8 @@ export async function getServerSideProps(context) {
     `https://api.themoviedb.org/3${requests[genre]?.url || requests.fetchTrendingMovies.url
     }&page=1`
   )
-  console.log("URL ===> ", request.url)
+
   const response = await request.json()
-  console.log("RESPONSE ===> ", response.results)
   return {
     props: {
       results: response.results
